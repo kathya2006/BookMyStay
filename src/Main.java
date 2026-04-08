@@ -2,85 +2,41 @@ public class Main{
 
     public static void main(String[] args) {
 
-        System.out.println("Night Room Simulation");
+        System.out.println("Room Inventory Listing");
+
+        RoomInventory r1 = new RoomInventory("Single Room", 1, 1000.0, 5);
+        RoomInventory r2 = new RoomInventory("Double Room", 2, 2000.0, 3);
+        RoomInventory r3 = new RoomInventory("Suite Room", 4, 5000.0, 1);
+
+        System.out.println();
+        r1.printRoom();
         System.out.println();
 
-        RoomDefinition single = new RoomDefinition("Single Room", 1, 2000.0);
-        RoomDefinition doubleRoom = new RoomDefinition("Double Room", 2, 4000.0);
-        RoomDefinition suite = new RoomDefinition("Suite Room", 4, 8000.0);
+        r2.printRoom();
+        System.out.println();
 
-        single.printRoom();
-        doubleRoom.printRoom();
-        suite.printRoom();
+        r3.printRoom();
     }
 }
 
-class LongTermReservation {
-
-    private String name;
-    private int duration;
-    private double price;
-
-    public LongTermReservation(String name, int duration, double price) {
-        this.name = name;
-        this.duration = duration;
-        this.price = price;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public int getDuration() {
-        return duration;
-    }
-
-    public double getPrice() {
-        return price;
-    }
-}
-
-class RoomDefinition {
+class RoomInventory {
 
     private String name;
     private int max;
     private double pricePerNight;
+    private int numberOfRooms;
 
-    public RoomDefinition(String name, int max, double pricePerNight) {
+    public RoomInventory(String name, int max, double pricePerNight, int numberOfRooms) {
         this.name = name;
         this.max = max;
         this.pricePerNight = pricePerNight;
+        this.numberOfRooms = numberOfRooms;
     }
 
     public void printRoom() {
         System.out.println(name);
         System.out.println("Max: " + max);
         System.out.println("Price per night: " + pricePerNight);
-        System.out.println();
-    }
-}
-
-class Reservation {
-
-    private String guestName;
-    private int roomNumber;
-    private int nights;
-
-    public Reservation(String guestName, int roomNumber, int nights) {
-        this.guestName = guestName;
-        this.roomNumber = roomNumber;
-        this.nights = nights;
-    }
-
-    public String getGuestName() {
-        return guestName;
-    }
-
-    public int getRoomNumber() {
-        return roomNumber;
-    }
-
-    public int getNights() {
-        return nights;
+        System.out.println("Number of Rooms: " + numberOfRooms);
     }
 }
