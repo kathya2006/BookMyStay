@@ -1,83 +1,95 @@
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.*;
 
-// Class to represent Reservation
+// --- Class 1: Reservation (Guest Data) ---
 class Reservation {
     private String guestName;
     private String roomType;
 
-    // Constructor
     public Reservation(String guestName, String roomType) {
         this.guestName = guestName;
         this.roomType = roomType;
     }
 
-    // Getter methods
-    public String getGuestName() {
-        return guestName;
+    public String getGuestName() { return guestName; }
+    public String getRoomType() { return roomType; }
+}
+
+// --- Class 2: RoomInventory (Stock Management) ---
+class RoomInventory {
+    private Map<String, Integer> availability = new HashMap<>();
+
+    public RoomInventory() {
+        availability.put("Single", 5);
+        availability.put("Double", 3);
+        availability.put("Suite", 2);
     }
 
-    public String getRoomType() {
-        return roomType;
+    public int getAvailableCount(String type) {
+        return availability.getOrDefault(type, 0);
+    }
+
+    public void reduceInventory(String type) {
+        availability.put(type, availability.get(type) - 1);
     }
 }
 
-// Class to manage booking request queue
-class BookingRequestQueue {
+// --- Class 3: RoomAllocationService (The New Logic) ---
+class RoomAllocationService {
+    private Set<String> allocatedRoomIds;
+    private Map<String, Set<String>> assignedRoomsByType;
 
-    private Queue<Reservation> requestQueue;
-
-    // Constructor
-    public BookingRequestQueue() {
-        requestQueue = new LinkedList<>();
+    public RoomAllocationService() {
+        allocatedRoomIds = new HashSet<>();
+        assignedRoomsByType = new HashMap<>();
     }
 
-    // Add booking request
-    public void addRequest(Reservation reservation) {
-        requestQueue.offer(reservation);
+    public void allocateRoom(Reservation reservation, RoomInventory inventory) {
+        String type = reservation.getRoomType();
+
+        if (inventory.getAvailableCount(type) > 0) {
+            String roomId = generateRoomID(type);
+            inventory.reduceInventory(type);
+
+            System.out.println("Booking confirmed for Guest: " + reservation.getGuestName() +
+                    ", Room ID: " + roomId);
+        } else {
+            System.out.println("Booking failed for " + reservation.getGuestName() +
+                    ": No " + type + " rooms available.");
+        }
     }
 
-    // Get next booking request
-    public Reservation getNextRequest() {
-        return requestQueue.poll();
-    }
+    private String generateRoomID(String roomType) {
+        // Creates a unique ID like "Single-1", "Single-2", etc.
+        assignedRoomsByType.putIfAbsent(roomType, new HashSet<>());
+        int nextNumber = assignedRoomsByType.get(roomType).size() + 1;
+        String newId = roomType + "-" + nextNumber;
 
-    // Check if queue has pending requests
-    public boolean hasPendingRequests() {
-        return !requestQueue.isEmpty();
+        assignedRoomsByType.get(roomType).add(newId);
+        allocatedRoomIds.add(newId);
+        return newId;
     }
 }
 
-// Main class
-public class Main {
-
+// --- Class 4: Main Execution Class ---
+public class Ma {
     public static void main(String[] args) {
+        System.out.println("Room Allocation Processing");
+        System.out.println("----------------------------------------------");
 
-        System.out.println("Booking Request Queue");
-        System.out.println("--------------------------------");
+        // 1. Setup Inventory and Allocation Service
+        RoomInventory inventory = new RoomInventory();
+        RoomAllocationService allocationService = new RoomAllocationService();
 
-        BookingRequestQueue bookingQueue = new BookingRequestQueue();
+        // 2. Setup a Queue of requests (as per Use Case 5)
+        Queue<Reservation> requestQueue = new LinkedList<>();
+        requestQueue.offer(new Reservation("Abhi", "Single"));
+        requestQueue.offer(new Reservation("Subha", "Single")); // Note: Snapshot shows Subha as Single-2
+        requestQueue.offer(new Reservation("Vennathi", "Suite"));
 
-        // Creating reservation requests
-        Reservation r1 = new Reservation("Abhi", "Single");
-        Reservation r2 = new Reservation("Subha", "Double");
-        Reservation r3 = new Reservation("Vennathi", "Suite");
-
-        // Adding requests to queue
-        bookingQueue.addRequest(r1);
-        bookingQueue.addRequest(r2);
-        bookingQueue.addRequest(r3);
-
-        // Processing queue
-        while (bookingQueue.hasPendingRequests()) {
-            Reservation current = bookingQueue.getNextRequest();
-
-            System.out.println(
-                    "Processing booking for Guest: "
-                            + current.getGuestName()
-                            + ", Room Type: "
-                            + current.getRoomType()
-            );
+        // 3. Process the Queue (FIFO)
+        while (!requestQueue.isEmpty()) {
+            Reservation currentRequest = requestQueue.poll();
+            allocationService.allocateRoom(currentRequest, inventory);
         }
     }
 }
