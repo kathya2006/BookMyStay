@@ -1,55 +1,83 @@
+import java.util.LinkedList;
+import java.util.Queue;
+
+// Class to represent Reservation
+class Reservation {
+    private String guestName;
+    private String roomType;
+
+    // Constructor
+    public Reservation(String guestName, String roomType) {
+        this.guestName = guestName;
+        this.roomType = roomType;
+    }
+
+    // Getter methods
+    public String getGuestName() {
+        return guestName;
+    }
+
+    public String getRoomType() {
+        return roomType;
+    }
+}
+
+// Class to manage booking request queue
+class BookingRequestQueue {
+
+    private Queue<Reservation> requestQueue;
+
+    // Constructor
+    public BookingRequestQueue() {
+        requestQueue = new LinkedList<>();
+    }
+
+    // Add booking request
+    public void addRequest(Reservation reservation) {
+        requestQueue.offer(reservation);
+    }
+
+    // Get next booking request
+    public Reservation getNextRequest() {
+        return requestQueue.poll();
+    }
+
+    // Check if queue has pending requests
+    public boolean hasPendingRequests() {
+        return !requestQueue.isEmpty();
+    }
+}
+
+// Main class
 public class Main {
 
     public static void main(String[] args) {
 
-        RoomInventory r1 = new RoomInventory("Single Room", 1, 1000.0, 5);
-        RoomInventory r2 = new RoomInventory("Double Room", 2, 2000.0, 3);
-        RoomInventory r3 = new RoomInventory("Suite Room", 4, 5000.0, 1);
+        System.out.println("Booking Request Queue");
+        System.out.println("--------------------------------");
 
-        RoomInventoryList list = new RoomInventoryList();
-        list.addRoom(r1);
-        list.addRoom(r2);
-        list.addRoom(r3);
+        BookingRequestQueue bookingQueue = new BookingRequestQueue();
 
-        list.printRooms();
-    }
-}
+        // Creating reservation requests
+        Reservation r1 = new Reservation("Abhi", "Single");
+        Reservation r2 = new Reservation("Subha", "Double");
+        Reservation r3 = new Reservation("Vennathi", "Suite");
 
-class RoomInventory {
+        // Adding requests to queue
+        bookingQueue.addRequest(r1);
+        bookingQueue.addRequest(r2);
+        bookingQueue.addRequest(r3);
 
-    String name;
-    int max;
-    double pricePerNight;
-    int available;
+        // Processing queue
+        while (bookingQueue.hasPendingRequests()) {
+            Reservation current = bookingQueue.getNextRequest();
 
-    public RoomInventory(String name, int max, double pricePerNight, int available) {
-        this.name = name;
-        this.max = max;
-        this.pricePerNight = pricePerNight;
-        this.available = available;
-    }
-
-    public void printRoom() {
-        System.out.println(name);
-        System.out.println("Max: " + max);
-        System.out.println("Price per night: " + pricePerNight);
-        System.out.println("Available: " + available);
-    }
-}
-
-class RoomInventoryList {
-
-    RoomInventory[] rooms = new RoomInventory[10];
-    int count = 0;
-
-    public void addRoom(RoomInventory room) {
-        rooms[count++] = room;
-    }
-
-    public void printRooms() {
-        for (int i = 0; i < count; i++) {
-            rooms[i].printRoom();
-            System.out.println();
+            System.out.println(
+                    "Processing booking for Guest: "
+                            + current.getGuestName()
+                            + ", Room Type: "
+                            + current.getRoomType()
+            );
         }
     }
 }
