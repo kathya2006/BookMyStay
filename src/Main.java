@@ -1,95 +1,107 @@
 import java.util.*;
 
-// --- Class 1: Reservation (Guest Data) ---
-class Reservation {
-    private String guestName;
-    private String roomType;
+/**
+ * ==================================================
+ * MAIN CLASS - UseCase7AddOnServiceSelection
+ * ==================================================
+ *
+ * Use Case 7: Add-On Service Selection
+ *
+ * Description:
+ * This class demonstrates how optional
+ * services can be attached to a confirmed
+ * booking.
+ */
 
-    public Reservation(String guestName, String roomType) {
-        this.guestName = guestName;
-        this.roomType = roomType;
-    }
+public class Main {
 
-    public String getGuestName() { return guestName; }
-    public String getRoomType() { return roomType; }
-}
-
-// --- Class 2: RoomInventory (Stock Management) ---
-class RoomInventory {
-    private Map<String, Integer> availability = new HashMap<>();
-
-    public RoomInventory() {
-        availability.put("Single", 5);
-        availability.put("Double", 3);
-        availability.put("Suite", 2);
-    }
-
-    public int getAvailableCount(String type) {
-        return availability.getOrDefault(type, 0);
-    }
-
-    public void reduceInventory(String type) {
-        availability.put(type, availability.get(type) - 1);
-    }
-}
-
-// --- Class 3: RoomAllocationService (The New Logic) ---
-class RoomAllocationService {
-    private Set<String> allocatedRoomIds;
-    private Map<String, Set<String>> assignedRoomsByType;
-
-    public RoomAllocationService() {
-        allocatedRoomIds = new HashSet<>();
-        assignedRoomsByType = new HashMap<>();
-    }
-
-    public void allocateRoom(Reservation reservation, RoomInventory inventory) {
-        String type = reservation.getRoomType();
-
-        if (inventory.getAvailableCount(type) > 0) {
-            String roomId = generateRoomID(type);
-            inventory.reduceInventory(type);
-
-            System.out.println("Booking confirmed for Guest: " + reservation.getGuestName() +
-                    ", Room ID: " + roomId);
-        } else {
-            System.out.println("Booking failed for " + reservation.getGuestName() +
-                    ": No " + type + " rooms available.");
-        }
-    }
-
-    private String generateRoomID(String roomType) {
-        // Creates a unique ID like "Single-1", "Single-2", etc.
-        assignedRoomsByType.putIfAbsent(roomType, new HashSet<>());
-        int nextNumber = assignedRoomsByType.get(roomType).size() + 1;
-        String newId = roomType + "-" + nextNumber;
-
-        assignedRoomsByType.get(roomType).add(newId);
-        allocatedRoomIds.add(newId);
-        return newId;
-    }
-}
-
-// --- Class 4: Main Execution Class ---
-public class Ma {
     public static void main(String[] args) {
-        System.out.println("Room Allocation Processing");
-        System.out.println("----------------------------------------------");
 
-        // 1. Setup Inventory and Allocation Service
-        RoomInventory inventory = new RoomInventory();
-        RoomAllocationService allocationService = new RoomAllocationService();
+        AddonServiceManager manager = new AddonServiceManager();
 
-        // 2. Setup a Queue of requests (as per Use Case 5)
-        Queue<Reservation> requestQueue = new LinkedList<>();
-        requestQueue.offer(new Reservation("Abhi", "Single"));
-        requestQueue.offer(new Reservation("Subha", "Single")); // Note: Snapshot shows Subha as Single-2
-        requestQueue.offer(new Reservation("Vennathi", "Suite"));
+        String reservationId = "Single-1";
 
-        // 3. Process the Queue (FIFO)
-        while (!requestQueue.isEmpty()) {
-            Reservation currentRequest = requestQueue.poll();
-            allocationService.allocateRoom(currentRequest, inventory);
+        AddonService breakfast = new AddonService("Breakfast", 50.0);
+        AddonService spa = new AddonService("Spa", 100.0);
+
+        manager.addService(reservationId, breakfast);
+        manager.addService(reservationId, spa);
+
+        double totalCost = manager.calculateTotalServiceCost(reservationId);
+
+        System.out.println("Add-On Service Selection");
+        System.out.println("Reservation ID: " + reservationId);
+        System.out.println("Total Add-On Cost: " + totalCost);
+    }
+}
+
+
+/**
+ * ==================================================
+ * CLASS - AddonService
+ * ==================================================
+ *
+ * Represents an optional service
+ * that can be added to a reservation.
+ */
+
+class AddonService {
+
+    private String serviceName;
+    private double cost;
+
+    public AddonService(String serviceName, double cost) {
+        this.serviceName = serviceName;
+        this.cost = cost;
+    }
+
+    public String getServiceName() {
+        return serviceName;
+    }
+
+    public double getCost() {
+        return cost;
+    }
+}
+
+
+/**
+ * ==================================================
+ * CLASS - AddonServiceManager
+ * ==================================================
+ *
+ * Manages optional services for reservations
+ */
+
+class AddonServiceManager {
+
+    private Map<String, List<AddonService>> servicesByReservation;
+
+    public AddonServiceManager() {
+        servicesByReservation = new HashMap<>();
+    }
+
+    public void addService(String reservationId, AddonService service) {
+
+        if (!servicesByReservation.containsKey(reservationId)) {
+            servicesByReservation.put(reservationId, new ArrayList<>());
         }
+
+        servicesByReservation.get(reservationId).add(service);
+    }
+
+    public double calculateTotalServiceCost(String reservationId) {
+
+        double total = 0;
+
+        List<AddonService> services = servicesByReservation.get(reservationId);
+
+        if (services != null) {
+            for (AddonService service : services) {
+                total += service.getCost();
+            }
+        }
+
+        return total;
     }
 }
